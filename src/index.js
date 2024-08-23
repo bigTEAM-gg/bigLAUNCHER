@@ -15,6 +15,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      // Mandatory for doing node.js work in the render process
       contextIsolation: false,
       nodeIntegration: true,
       nodeIntegrationInWorker: true
@@ -45,9 +46,19 @@ app.whenReady().then(() => {
   });
 });
 
-ipcMain.on('exec', (event, command) => {
+let child = null
+
+// Executes a file passed by the render process. Used on button click.
+ipcMain.on('exec', (event, file) => {
   mainWindow.minimize()
-  child_process.exec(command, () => mainWindow.restore())
+  child = child_process.execFile(file, () => mainWindow.restore())
+})
+
+// Terminates child process
+ipcMain.on("killChild", () => {
+  if (child != null && !child.killed) {
+    console.log(child.kill())
+  }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -58,6 +69,3 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

@@ -9,20 +9,93 @@
     <h1>💖 Hello World!</h1>
     <p>Welcome to your Electron application.</p>
     <div id="buttons">
-      <button command="gedit">gedit</button>
+      <button file="/usr/bin/gedit">gedit</button>
     </div>
   </body>
 
   <script>
+    // facilitates communication with the main process
     const { ipcRenderer } = require("electron")
 
     const buttonContainer = document.getElementById('buttons')
     const buttons = Array.from(buttonContainer.children)
 
-    buttons.forEach(button => {
-      button.addEventListener('click', () => {
-        ipcRenderer.send('exec', button.getAttribute("command"))
+    // Stores UNIX timestamp (in ms) of last gamepad input
+    let lastInput = Date.now()
+
+    // Start polling a gamepad when it connects
+    window.addEventListener("gamepadconnected", (e) => {
+      console.log(
+        "Gamepad connected at index %d: %s. %d buttons, %d axes.",
+        e.gamepad.index,
+        e.gamepad.id,
+        e.gamepad.buttons.length,
+        e.gamepad.axes.length,
+      );
+
+      const gIndex = e.gamepad.index
+      // Gamepad polling code
+      let inputInterval = setInterval(() => {
+        const gamepad = navigator.getGamepads()[gIndex]
+
+        let s = gamepad.id + "\nButtons: "
+
+        gamepad.buttons.forEach((b, i) => {
+          s += i + "(" + b.pressed + "," + b.value + ") "
+        });
+
+        s += "\nAxes: "
+        gamepad.axes.forEach((a, i) => {
+          s += i + "(" + a + ") "
+        });
+
+        //console.log(s)
+
+        if (inputDetected(gamepad)) {
+          lastInput = Date.now()
+        }
+      }, 10)
+
+      // stop polling a controlled if it disconnects
+      window.addEventListener("gamepaddisconnected", (e) => {
+        if (e.gamepad.index == gIndex) {
+          clearInterval(inputInterval)
+        }
       });
     });
+
+    // onclick for buttons
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        ipcRenderer.send('exec', button.getAttribute("file"))
+        lastInput = Date.now()
+        startTimeout(1000)
+      });
+    });
+
+    function startTimeout(t) {
+      setTimeout(() => {
+        const sinceLastInput = Date.now() - lastInput;
+        if (sinceLastInput >= t) {
+          ipcRenderer.send("killChild")
+        }
+        else
+        {
+          startTimeout(t - sinceLastInput)
+        }
+      }, t)
+    }
+
+    // check for inputs on the given gamepad
+    function inputDetected(gamepad) {
+      let output = false
+
+      // check if any buttons are pressed
+      output = gamepad.buttons.reduce((acc, cur) => acc || cur.pressed, output)
+      // check if joysticks are moved. The 0.1 literal is a deadzone.
+      output = gamepad.axes.reduce((acc, cur) => acc || (Math.abs(cur) > 0.1), output)
+
+      return output
+    }
   </script>
 </html>
