@@ -20,6 +20,8 @@
     const buttonContainer = document.getElementById('buttons')
     const buttons = Array.from(buttonContainer.children)
 
+    const second = 1000;
+
     // Stores UNIX timestamp (in ms) of last gamepad input
     let lastInput = Date.now()
 
@@ -51,12 +53,20 @@
 
         //console.log(s)
 
+        // check for inputs to reset time
         if (inputDetected(gamepad)) {
           lastInput = Date.now()
         }
-      }, 10)
 
-      // stop polling a controlled if it disconnects
+        // check for start & back being pressed as game ending shortcut
+        if (gamepad.buttons.length > 9 &&
+            gamepad.buttons[8].pressed && 
+            gamepad.buttons[9].pressed) {
+          ipcRenderer.send("killChild")
+        }
+      }, second/100)
+
+      // stop polling a controller if it disconnects
       window.addEventListener("gamepaddisconnected", (e) => {
         if (e.gamepad.index == gIndex) {
           clearInterval(inputInterval)
@@ -69,7 +79,7 @@
       button.addEventListener('click', () => {
         ipcRenderer.send('exec', button.getAttribute("file"))
         lastInput = Date.now()
-        startTimeout(1000)
+        startTimeout(60 * second)
       });
     });
 
@@ -86,7 +96,7 @@
       }, t)
     }
 
-    // check for inputs on the given gamepad
+    // check for any inputs on the given gamepad
     function inputDetected(gamepad) {
       let output = false
 
