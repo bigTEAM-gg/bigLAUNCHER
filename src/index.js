@@ -1,18 +1,23 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
+const child_process = require("node:child_process")
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+let mainWindow = null;
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: false,
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true
     },
   });
 
@@ -21,6 +26,8 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  mainWindow.setFullScreen(true);
 };
 
 // This method will be called when Electron has finished
@@ -35,19 +42,13 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
-    
-  });
-  const child_process = require("node:child_process")
-
-  const buttonContainer = document.getElementById('buttons')
-  const buttons = Array.from(buttonContainer.children)
-
-  buttons.forEach(button => {
-    button.addEventListener('click', () => {
-      child_process.exec(button.getAttribute("command"));
-    });
   });
 });
+
+ipcMain.on('exec', (event, command) => {
+  mainWindow.minimize()
+  child_process.exec(command, () => mainWindow.restore())
+})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

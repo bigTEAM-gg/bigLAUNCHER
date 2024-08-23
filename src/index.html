@@ -12,4 +12,17 @@
       <button command="gedit">gedit</button>
     </div>
   </body>
+
+  <script>
+    const { ipcRenderer } = require("electron")
+
+    const buttonContainer = document.getElementById('buttons')
+    const buttons = Array.from(buttonContainer.children)
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        ipcRenderer.send('exec', button.getAttribute("command"))
+      });
+    });
+  </script>
 </html>
