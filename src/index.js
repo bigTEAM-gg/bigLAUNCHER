@@ -26,7 +26,7 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.setFullScreen(true);
 };
@@ -51,13 +51,16 @@ let child = null
 // Executes a file passed by the render process. Used on button click.
 ipcMain.on('exec', (event, file) => {
   mainWindow.minimize()
-  child = child_process.execFile(file, () => mainWindow.restore())
+  child = child_process.execFile(file, () => {
+    mainWindow.restore()
+  })
 })
 
 // Terminates child process
 ipcMain.on("killChild", () => {
   if (child != null && !child.killed) {
     console.log(child.kill())
+    mainWindow.restore()
   }
 })
 

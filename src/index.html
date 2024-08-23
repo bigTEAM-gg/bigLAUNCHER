@@ -10,6 +10,17 @@
     <p>Welcome to your Electron application.</p>
     <div id="buttons">
       <button file="/usr/bin/gedit">gedit</button>
+      <button file="/usr/bin/qdirstat">qdirstat</button>
+      <button file="/usr/bin/nautilus">nautilus</button>
+      <button file="/usr/bin/gedit">gedit</button>
+      <button file="/usr/bin/qdirstat">qdirstat</button>
+      <button file="/usr/bin/nautilus">nautilus</button>
+      <button file="/usr/bin/gedit">gedit</button>
+      <button file="/usr/bin/qdirstat">qdirstat</button>
+      <button file="/usr/bin/nautilus">nautilus</button>
+      <button file="/usr/bin/gedit">gedit</button>
+      <button file="/usr/bin/qdirstat">qdirstat</button>
+      <button file="/usr/bin/nautilus">nautilus</button>
     </div>
   </body>
 
@@ -27,6 +38,9 @@
 
     // Start polling a gamepad when it connects
     window.addEventListener("gamepadconnected", (e) => {
+      // make sure no fake game pads are being used
+      if (e.gamepad.buttons.length < 14) return;
+
       console.log(
         "Gamepad connected at index %d: %s. %d buttons, %d axes.",
         e.gamepad.index,
@@ -41,7 +55,7 @@
         const gamepad = navigator.getGamepads()[gIndex]
 
         // input logging
-        /*
+        
         let s = gamepad.id + "\nButtons: "
 
         gamepad.buttons.forEach((b, i) => {
@@ -54,7 +68,7 @@
         });
 
         console.log(s)
-        */
+        
 
         // check for inputs to reset time
         if (inputDetected(gamepad)) {
@@ -62,11 +76,16 @@
         }
 
         // check for start & back being pressed as game ending shortcut
-        if (gamepad.buttons.length > 9 &&
-            gamepad.buttons[8].pressed && 
+        if (gamepad.buttons[8].pressed && 
             gamepad.buttons[9].pressed) {
           ipcRenderer.send("killChild")
         }
+        
+        // only interact with the menu if this page is focused
+        if (document.hasFocus()) {
+          menuInteract(gamepad)
+        }
+        
       }, second/100)
 
       // stop polling a controller if it disconnects
@@ -111,6 +130,42 @@
       output = gamepad.axes.reduce((acc, cur) => acc || (Math.abs(cur) > 0.1), output)
 
       return output
+    }
+
+    // tracks menu interactions so that they do not happen too rapidly
+    let lastA = Date.now()
+    let lastUp = Date.now()
+    let lastDown = Date.now()
+
+    // set a delay so that the interactions don't happen every frame
+    const menuDelay = second/7
+
+    // process inputs to do with menu interaction
+    function menuInteract(gamepad) {
+      try {
+        if (!buttons.reduce(
+          (acc, cur) => acc || document.activeElement == cur, false)) {
+          buttons[0].focus()
+        }
+
+        // when A pressed
+        if (gamepad.buttons[0].pressed && Date.now() - lastA >= menuDelay) {
+          lastA = Date.now()
+          document.activeElement.click()
+        }
+
+        // when Up pressed (d-pad)
+        if (gamepad.buttons[12].pressed && Date.now() - lastUp >= menuDelay) {
+          lastUp = Date.now()
+          document.activeElement.previousElementSibling.focus()
+        }
+
+        // when Down pressed (d-pad)
+        if (gamepad.buttons[13].pressed && Date.now() - lastDown >= menuDelay) {
+          lastDown = Date.now()
+          document.activeElement.nextElementSibling.focus()
+        }
+      } catch (error) {}
     }
   </script>
 </html>
