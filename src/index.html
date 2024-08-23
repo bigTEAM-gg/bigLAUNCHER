@@ -40,6 +40,8 @@
       let inputInterval = setInterval(() => {
         const gamepad = navigator.getGamepads()[gIndex]
 
+        // input logging
+        /*
         let s = gamepad.id + "\nButtons: "
 
         gamepad.buttons.forEach((b, i) => {
@@ -51,7 +53,8 @@
           s += i + "(" + a + ") "
         });
 
-        //console.log(s)
+        console.log(s)
+        */
 
         // check for inputs to reset time
         if (inputDetected(gamepad)) {
@@ -83,6 +86,8 @@
       });
     });
 
+    // Ends the child process if t milliseconds have passed since last input,
+    // else restarts the timer with an appropriate amount of time.
     function startTimeout(t) {
       setTimeout(() => {
         const sinceLastInput = Date.now() - lastInput;
