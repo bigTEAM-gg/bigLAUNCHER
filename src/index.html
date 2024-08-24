@@ -16,7 +16,7 @@
       <button file="/usr/bin/gedit">gedit</button>
       <button file="/usr/bin/qdirstat">qdirstat</button>
       <button file="/usr/bin/nautilus">nautilus</button>
-      <button file="/usr/bin/gedit">gedit</button>
+      <button file="/usr/bin/gedit" immortal> immortal gedit</button>
       <button file="/usr/bin/qdirstat">qdirstat</button>
       <button file="/usr/bin/nautilus">nautilus</button>
     </div>
@@ -31,6 +31,7 @@
     const buttons = Array.from(buttonContainer.children)
 
     const second = 1000;
+    const timeout = second * 5;
 
     // Stores UNIX timestamp (in ms) of last gamepad input
     let lastInput = Date.now()
@@ -100,7 +101,11 @@
       button.addEventListener('click', () => {
         ipcRenderer.send('exec', button.getAttribute("file"))
         lastInput = Date.now()
-        startTimeout(60 * second)
+        if (!button.getAttribute("immortal"))
+        {
+          console.log(button.getAttribute("immortal"))
+          startTimeout(timeout)
+        }
       });
     });
 
@@ -166,5 +171,7 @@
         }
       } catch (error) {}
     }
+
+    ipcRenderer.on("hotkey", () => lastInput = Date.now())
   </script>
 </html>
