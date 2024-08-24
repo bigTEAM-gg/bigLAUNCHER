@@ -11,8 +11,6 @@ let mainWindow = null;
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       // Mandatory for doing node.js work in the render process
