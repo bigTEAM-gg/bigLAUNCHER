@@ -48,13 +48,21 @@ app.whenReady().then(() => {
 });
 
 let child = null
+let monitor = null
 
 // Executes a file passed by the render process. Used on button click.
-ipcMain.on('exec', (event, file) => {
+ipcMain.on('exec', (event, file, immortal) => {
   mainWindow.minimize()
   child = child_process.execFile(file, () => {
     mainWindow.restore()
   })
+  if (!immortal) {
+    monitor = child_process.exec("python " + "src/idlemonitor.py",
+      (err, stdout, stderr) => {
+        console.log(err, stdout, stderr)
+        killChild()
+      })
+  }
 })
 
 // Terminates child process
@@ -63,9 +71,10 @@ function killChild() {
     console.log(child.kill())
     mainWindow.restore()
   }
+  if (monitor != null && !child.killed) {
+    monitor.kill()
+  }
 }
-
-ipcMain.on("killChild", killChild)
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

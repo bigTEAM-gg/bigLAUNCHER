@@ -35,7 +35,7 @@ class XboxController(object):
         self._monitor_thread.start()
 
 
-    def read(self): # return the buttons/triggers that you care about in this methode
+    def read(self): # return the buttons/triggers that you care about in this method
         return [
             self.LeftJoystickY,
             self.LeftJoystickX,
@@ -109,9 +109,6 @@ class XboxController(object):
                 elif event.code == 'ABS_HAT0X':
                     self.LeftDPad = event.state
 
-
-
-
 if __name__ == '__main__':
     joy = XboxController()
     last_input = time.time()
@@ -120,6 +117,5 @@ if __name__ == '__main__':
             if abs(j) > 0.1:
                 print(j)
                 last_input = time.time()
-        if time.time() > last_input + 60:
-            print("boogaboogaboo")
+        if (time.time() > last_input + 60) or (joy.Start and joy.Back):
             exit(1)

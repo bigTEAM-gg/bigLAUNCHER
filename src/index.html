@@ -53,35 +53,6 @@
       // Gamepad polling code
       let inputInterval = setInterval(() => {
         const gamepad = navigator.getGamepads()[gIndex]
-
-        // input logging
-        /*
-        let s = gamepad.id + "\nButtons: "
-
-        gamepad.buttons.forEach((b, i) => {
-          s += i + "(" + b.pressed + "," + b.value + ") "
-        });
-
-        s += "\nAxes: "
-        gamepad.axes.forEach((a, i) => {
-          s += i + "(" + a + ") "
-        });
-
-        console.log(s)
-        */
-
-
-        // check for inputs to reset time
-        if (inputDetected(gamepad)) {
-          lastInput = Date.now()
-          console.log('input')
-        }
-
-        // check for start & back being pressed as game ending shortcut
-        if (gamepad.buttons[8].pressed && 
-            gamepad.buttons[9].pressed) {
-          ipcRenderer.send("killChild")
-        }
         
         // only interact with the menu if this page is focused
         if (document.hasFocus()) {
@@ -102,41 +73,12 @@
     // onclick for buttons
     buttons.forEach(button => {
       button.addEventListener('click', () => {
-        ipcRenderer.send('exec', button.getAttribute("file"))
+        ipcRenderer.send('exec',
+          button.getAttribute("file"), 
+          button.getAttribute("immortal") != null)
         lastInput = Date.now()
-        if (button.getAttribute("immortal") == null)
-        {
-          startTimeout(timeout)
-        }
       });
     });
-
-    // Ends the child process if t milliseconds have passed since last input,
-    // else restarts the timer with an appropriate amount of time.
-    function startTimeout(t) {
-      setTimeout(() => {
-        const sinceLastInput = Date.now() - lastInput;
-        if (sinceLastInput >= t) {
-          ipcRenderer.send("killChild")
-        }
-        else
-        {
-          startTimeout(t - sinceLastInput)
-        }
-      }, t)
-    }
-
-    // check for any inputs on the given gamepad
-    function inputDetected(gamepad) {
-      let output = false
-
-      // check if any buttons are pressed
-      output = gamepad.buttons.reduce((acc, cur) => acc || cur.pressed, output)
-      // check if joysticks are moved. The 0.1 literal is a deadzone.
-      output = gamepad.axes.reduce((acc, cur) => acc || (Math.abs(cur) > 0.1), output)
-
-      return output
-    }
 
     // tracks menu interactions so that they do not happen too rapidly
     let lastA = Date.now()
@@ -173,7 +115,5 @@
         }
       } catch (error) {}
     }
-
-    ipcRenderer.on("hotkey", () => lastInput = Date.now())
   </script>
 </html>
