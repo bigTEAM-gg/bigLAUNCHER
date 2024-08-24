@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('node:path');
-const child_process = require("node:child_process")
+const child_process = require("node:child_process");
+const { kill } = require('node:process');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -42,6 +43,8 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+
+  globalShortcut.register("Ctrl+Esc", killChild)
 });
 
 let child = null
@@ -55,12 +58,14 @@ ipcMain.on('exec', (event, file) => {
 })
 
 // Terminates child process
-ipcMain.on("killChild", () => {
+function killChild() {
   if (child != null && !child.killed) {
     console.log(child.kill())
     mainWindow.restore()
   }
-})
+}
+
+ipcMain.on("killChild", killChild)
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -70,16 +75,3 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-/*
-globalShortcut.registerAll(
-  ['a','b','c','d','e','f','g','h','i','j',
-   'k','l','m','n','o','p','q','r','s','t',
-   'u','v','w','x','y','z',
-   '0','1','2','3','4','5','6','7','8','9',
-   '`','~','!','@','#','$','%','^','&','*',
-   '(',')','-','_','=','+',';','[',']','\\',':',
-   '{','}','|','i','\'','I','\"',',','.','/','<','>','?',
-  'Space', 'Tab', 'Backspace','Delete','Enter',
-  'Up','Down','Left','Right',
-  'num0','num1','num2','num3','num4','num5','num6','num7','num8','num9'],
-  () => ipcMain.send("hotkey"))*/
