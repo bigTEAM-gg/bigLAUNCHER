@@ -9,6 +9,13 @@ body {
   text-align:center;
 }
 
+* > * {
+  font-family: "Gugi", monospace !important;
+  font-weight: 400;
+  font-style: normal;
+  text-shadow: 1px 1px 2px red, 0 0 1em blue, 0 0 0.2em blue !important;
+}
+
 #buttons {
   display: flex;
   flex-direction: column;
@@ -19,7 +26,7 @@ body {
 
 button {
   color: chartreuse;
-  background-color: black;
+  background-color: transparent;
   border:none;
   font-size: 30pt;
 }
@@ -30,4 +37,13 @@ button:focus {
   background-color: chartreuse;
   border:none;
   font-size: 30pt;
+}
+
+video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
 }

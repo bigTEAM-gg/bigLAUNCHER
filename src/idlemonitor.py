@@ -117,5 +117,5 @@ if __name__ == '__main__':
             if abs(j) > 0.1:
                 print(j)
                 last_input = time.time()
-        if (time.time() > last_input + 60) or (joy.Start and joy.Back):
+        if (time.time() > last_input + 60) or (joy.Start):
             exit(1)

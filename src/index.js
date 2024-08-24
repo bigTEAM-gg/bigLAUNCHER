@@ -17,16 +17,20 @@ const createWindow = () => {
       // Mandatory for doing node.js work in the render process
       contextIsolation: false,
       nodeIntegration: true,
-      nodeIntegrationInWorker: true
+      nodeIntegrationInWorker: true,
+      webPreferences: {
+        webSecurity: false
+      }
     },
   });
+
+  mainWindow.setMenu(null)
 
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
-
+  // mainWindow.webContents.openDevTools();
   mainWindow.setFullScreen(true);
 };
 
@@ -67,6 +71,9 @@ ipcMain.on('exec', (event, file, immortal) => {
 
 // Terminates child process
 function killChild() {
+  child_process.exec('taskkill /F /im Protokrieg_Live.exe')
+  child_process.exec('taskkill /F /im taskkill /F /im bigTeamBlue-Win64-Shipping.exe')
+  child_process.exec('taskkill /F /im SwordStrikeSpaceVampires.exe')
   if (child != null && !child.killed) {
     console.log(child.kill())
     mainWindow.restore()
