@@ -4,4 +4,30 @@ body {
   margin: auto;
   max-width: 38rem;
   padding: 2rem;
+  color: chartreuse;
+  background-color: black;
+  text-align:center;
+}
+
+#buttons {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: normal;
+  align-content: normal;
+}
+
+button {
+  color: chartreuse;
+  background-color: black;
+  border:none;
+  font-size: 30pt;
+}
+
+button:focus {
+  outline:none;
+  color: black;
+  background-color: chartreuse;
+  border:none;
+  font-size: 30pt;
 }
