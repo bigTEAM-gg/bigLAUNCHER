@@ -7,7 +7,7 @@
   </head>
   <body>
     <div id="buttons">
-      <button file="/usr/bin/gedit">gedit</button>
+      <button file="./games/sssv/SwordStrikeSpaceVampires.exe">gedit</button>
       <button file="/usr/bin/qdirstat">qdirstat</button>
       <button file="/usr/bin/nautilus">nautilus</button>
       <button file="/usr/bin/gedit">gedit</button>
@@ -70,9 +70,11 @@
         console.log(s)
         */
 
+
         // check for inputs to reset time
         if (inputDetected(gamepad)) {
           lastInput = Date.now()
+          console.log('input')
         }
 
         // check for start & back being pressed as game ending shortcut
@@ -90,6 +92,7 @@
 
       // stop polling a controller if it disconnects
       window.addEventListener("gamepaddisconnected", (e) => {
+        console.log('dsfdsf')
         if (e.gamepad.index == gIndex) {
           clearInterval(inputInterval)
         }
