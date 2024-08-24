@@ -101,9 +101,8 @@
       button.addEventListener('click', () => {
         ipcRenderer.send('exec', button.getAttribute("file"))
         lastInput = Date.now()
-        if (!button.getAttribute("immortal"))
+        if (button.getAttribute("immortal") == null)
         {
-          console.log(button.getAttribute("immortal"))
           startTimeout(timeout)
         }
       });
