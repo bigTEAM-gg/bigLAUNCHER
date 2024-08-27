@@ -27,6 +27,7 @@ If all that sounds like a headache, just use the dev build on game day like I di
 2. Swap out `/public/logo192.png`
 3. Swap out `/public/attract.webm` with a montage of all your games available
 4. Adjust the time stamps in the attract array so as games are hovered, the video player skips to the time where they are
-5. Polish whatever you want with CSS and HTML!
+5. Adjust the `taskill` commands in `index.js` to be for your games that are really stubborn about closing.
+6. Polish whatever you want with CSS and HTML!
 
 ![1724650301839](https://github.com/user-attachments/assets/3f4f6b2c-7190-435b-9d0f-43f384cda571)
