@@ -1,5 +1,7 @@
 # bigLAUNCHER
-Multi-game launcher and idle detector made for bigTEAM Arcade Treasure presented at The Vancouver Game Garden 2024
+Multi-game launcher and idle detector made for [Vancouver Game Garden](https://vangamegarden.com/) (2024)
+
+![](https://raw.githubusercontent.com/bigTEAM-gg/bigLAUNCHER/main/demo.gif)
 
 ## Getting Started
 1. `pip install -r requirements.txt`
