@@ -91,7 +91,7 @@ typings/
 # Electron-Forge
 out/
 
-games/*
-
-media/attract.mp4
-
+static/*
+!idlemonitor.py
+!logo192.png
+!attract.webm

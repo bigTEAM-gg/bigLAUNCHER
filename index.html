@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>bigLAUNCHER</title>
+    <link rel="stylesheet" href="index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <img src="./public/logo192.png" />
+    <h1 style="font-size: 30pt">bigTEAM Arcade Treasures!</h1>
+    <p style="font-size: 25pt">(Select with the d-pad, start with A)</p>
+    <div id="buttons">
+      <button file="./static/sssv/SwordStrikeSpaceVampires.exe" immortal >Sword Strike Space Vampires</button>
+      <button file="./static/thenotsobigescape/tnsbe.exe">The not-so Big Escape</button>
+      <button file="./static/organicgrowth/organic-growth.exe">Organic Growth</button>
+      <button file="./static/wreckening/wreckening.exe">The Wreckening</button>
+      <button file="./static/canwekeepit/Can-we-keep-it.exe">Can We Keep It?</button>
+      <button file="./static/meatboat/meatboat.exe">MEATBOAT</button>
+      <button file="./static/artospass/Arktos Pass.exe">Arktos' Pass</button>
+      <button file="./static/fallofturtlereef/bigTeamBlue.exe">The Fall of Turtle Reef</button>
+      <button file="./static/uberkrieg/Protokrieg_Live.exe">Uberkrieg</button>
+    </div>
+
+    <video id="attract" autoplay loop src="./public/attract.webm">
+    </video>
+  </body>
+
+  <script>
+    const t = (min, sec) => (min * 60) + sec
+
+    const attract = document.getElementById("attract")
+    Array.from(document.querySelectorAll('button')).forEach((b, i) => {
+      b.addEventListener('focus', () => {
+        attract.currentTime = [
+          t(7, 52),
+          t(4, 54),
+          t(3,52),
+          t(5, 44),
+          t(0, 27),
+          t(2, 48),
+          t(0, 0),
+          t(1, 40),
+          t(6, 38)
+        ][i];
+        attract.play()
+      })
+    })
+
+
+    // facilitates communication with the main process
+    const { ipcRenderer } = require("electron")
+
+    const buttonContainer = document.getElementById('buttons')
+    const buttons = Array.from(buttonContainer.children)
+
+    const second = 1000;
+    const timeout = second * 5;
+
+    // Stores UNIX timestamp (in ms) of last gamepad input
+    let lastInput = Date.now()
+
+    // Start polling a gamepad when it connects
+    window.addEventListener("gamepadconnected", (e) => {
+      // make sure no fake game pads are being used
+      if (e.gamepad.buttons.length < 14) return;
+
+      console.log(
+        "Gamepad connected at index %d: %s. %d buttons, %d axes.",
+        e.gamepad.index,
+        e.gamepad.id,
+        e.gamepad.buttons.length,
+        e.gamepad.axes.length,
+      );
+
+      const gIndex = e.gamepad.index
+      // Gamepad polling code
+      let inputInterval = setInterval(() => {
+        const gamepad = navigator.getGamepads()[gIndex]
+        
+        // only interact with the menu if this page is focused
+        if (document.hasFocus()) {
+          menuInteract(gamepad)
+        }
+        
+      }, second/100)
+
+      // stop polling a controller if it disconnects
+      window.addEventListener("gamepaddisconnected", (e) => {
+        if (e.gamepad.index == gIndex) {
+          clearInterval(inputInterval)
+        }
+      });
+    });
+
+    // onclick for buttons
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        ipcRenderer.send('exec',
+          button.getAttribute("file"), 
+          button.getAttribute("immortal") != null)
+        lastInput = Date.now()
+      });
+    });
+
+    // tracks menu interactions so that they do not happen too rapidly
+    let lastA = Date.now()
+    let lastUp = Date.now()
+    let lastDown = Date.now()
+
+    // set a delay so that the interactions don't happen every frame
+    const menuDelay = second/7
+
+    // process inputs to do with menu interaction
+    function menuInteract(gamepad) {
+      try {
+        if (!buttons.reduce(
+          (acc, cur) => acc || document.activeElement == cur, false)) {
+          buttons[0].focus()
+        }
+
+        // when A pressed
+        if (gamepad.buttons[0].pressed && Date.now() - lastA >= menuDelay) {
+          lastA = Date.now()
+          document.activeElement.click()
+        }
+
+        // when Up pressed (d-pad)
+        if (gamepad.buttons[12].pressed && Date.now() - lastUp >= menuDelay) {
+          lastUp = Date.now()
+          document.activeElement.previousElementSibling.focus()
+        }
+
+        // when Down pressed (d-pad)
+        if (gamepad.buttons[13].pressed && Date.now() - lastDown >= menuDelay) {
+          lastDown = Date.now()
+          document.activeElement.nextElementSibling.focus()
+        }
+      } catch (error) {}
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const keyName = event.key.toLowerCase();
+
+      const clicked = (...keys) => keys.some(k => k === keyName)
+
+      if (!buttons.reduce((acc, cur) => acc || document.activeElement == cur, false)) {
+        buttons[0].focus()
+      } else if (clicked('w', 'arrowup')) {
+        // up
+        // Tab is handled by default behaviour
+        lastUp = Date.now()
+        document.activeElement.previousElementSibling.focus()
+      } else if (clicked('s', 'arrowdown')) {
+        // down
+        // Tab is handled by default behaviour
+        lastDown = Date.now()
+        document.activeElement.nextElementSibling.focus()
+      } else if (clicked('space')) {
+        // select
+        // Enter is handled by default behaviour
+        lastA = Date.now()
+        document.activeElement.click()
+      }
+    });
+  </script>
+</html>
